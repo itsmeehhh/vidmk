@@ -58,6 +58,7 @@ botly.on("message", async (senderId, message, data) => {
       } else {
         console.error('Unexpected response:', data);
         botly.sendText({id: senderId, text: "حدث خطأ أثناء محاولة تحويل النص إلى صور. يرجى المحاولة مرة أخرى في وقت لاحق."});
+        userStatus[senderId] = false;
       }
 
     }
