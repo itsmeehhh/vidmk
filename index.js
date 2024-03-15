@@ -82,8 +82,8 @@ botly.on("postback", async (senderId, message, postback, data, ref) => {
     /*--------- s t a r t ---------*/
     if (message.postback){ // Normal (buttons)
     if (postback == "GET_STARTED"){           botly.sendGeneric({id: senderId, elements: {
-                title: "سعيد بلقاءك ❤️، انا هنا لتحويل كل ما في بالك الى صورة 😯",
-                image_url: "https://telegra.ph/file/afae3cecb1be747aa78bf.png",
+                title: "سعيد بلقاءك ❤️، انا هنا لتحويل كل ما في بالك الى صور ابداعية 😍",
+                image_url: "https://telegra.ph/file/77edfdf7b35823caf90f6.jpg",
                 subtitle: "ارسل نصا لكي احوله الى صورة ❤️",
                 buttons: [
                   botly.createPostbackButton("مطور البوت 🇲🇦😄", "Owner"),
@@ -124,7 +124,7 @@ botly.setGreetingText({
     greeting: [
       {
         locale: "default",
-        text: "xxx هو روبوت لتحويل نص الى رسمة واقعية 😯 \n سعداء باستخدامكم روبوتاتنا ❤️🇲🇦"
+        text: "CatBot - Image Generator Bot\nهو روبوت لتحويل نص الى صور واقعية 😯\n❤️🇲🇦"
       }
     ]
   });
