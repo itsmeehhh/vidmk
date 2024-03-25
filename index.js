@@ -1,12 +1,16 @@
-const fs = require('fs')
-const {Blob, FormData} = require('formdata-node')
-const express = require("express");
+import { generateImagesLinks } from 'bimg';
+import fs from 'fs';
+import { Blob, FormData } from 'formdata-node';
+import express from 'express';
+import bodyParser from 'body-parser';
+import dotenv from 'dotenv';
+import Botly from 'botly';
+import fetch from 'node-fetch';
+
+dotenv.config();
+
 const app = express();
-const bodyParser = require("body-parser");
 const port = 8080;
-require('dotenv').config();
-const Botly = require("botly");
-const fetch = require("node-fetch");
 const PageID = "245492821986982";
 let userStatus = {};
 /*--------- page database ---------*/
@@ -56,9 +60,19 @@ botly.on("message", async (senderId, message, data) => {
         }
         userStatus[senderId] = false;
       } else {
+        try {
+          botly.sendText({id: senderId, text: "حدث خطأ بسبب الضغط ، لذلك يتم الان استخدام السرفر التاني لتوليد صورتك مجددا لذلك انتظر قليلا ❤️"});
+  const images = await generateImagesLinks(userText);
+
+          for (let image of images) {
+          botly.sendImage({id: senderId, url: image, aspectRatio: Botly.CONST.IMAGE_ASPECT_RATIO.HORIZONTAL});
+        }
+        userStatus[senderId] = false;
+        } catch {
         console.error('Unexpected response:', data);
         botly.sendText({id: senderId, text: "حدث خطأ أثناء محاولة تحويل النص إلى صور. يرجى المحاولة مرة أخرى في وقت لاحق."});
         userStatus[senderId] = false;
+        }
       }
 
     }
