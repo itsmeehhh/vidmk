@@ -24,7 +24,7 @@
     "VERIFY_TOKEN": {
       "description": "to connect webhook",
       "required": true,
-      "value": ""
+      "value": "12345678"
     },
     "PAGE_ACCESS_TOKEN": {
       "description": "your page token",
@@ -33,6 +33,11 @@
     },
      "APP_SECRET": {
       "description": "your app key",
+      "required": true,
+      "value": ""
+    },
+    "BING_IMAGE_COOKIE": {
+      "description": "your bing cookie",
       "required": true,
       "value": ""
     }
