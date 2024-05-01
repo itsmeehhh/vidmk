@@ -6,7 +6,7 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import Botly from 'botly';
 import fetch from 'node-fetch';
-
+import axios from 'axios';
 dotenv.config();
 
 const app = express();
@@ -40,47 +40,33 @@ botly.on("message", async (senderId, message, data) => {
 
   /*--------- s t a r t ---------*/
   if (message.message.text) {
-    if (userStatus[senderId]) {
-      botly.sendText({id: senderId, text: "رجاءا انتظر حتى يتم توليد الصور الخاصة برسالتك السابقة ❤️"});
-    } else {
-      userStatus[senderId] = true;
-      botly.sendText({id: senderId, text: "الميزة تجريبية ❗⏳\n لذلك قد يستغرق وقتا اطول لتويد الصور الخاص بك 🏙️ "});
-
-      let userText = encodeURIComponent(message.message.text); 
-      let apiUrl = `https://raiden-api.up.railway.app/api/ai/bingimage?q=${userText}`; 
-
-      let response = await fetch(apiUrl);
-      let data = await response.json();
-
-      if (Array.isArray(data.data)) {
-        let imageUrls = data.data
-
-        for (let imageUrl of imageUrls) {
-          botly.sendImage({id: senderId, url: imageUrl, aspectRatio: Botly.CONST.IMAGE_ASPECT_RATIO.HORIZONTAL});
-        }
-        userStatus[senderId] = false;
-      } else {
-        try {
-          botly.sendText({id: senderId, text: "حدث خطأ بسبب الضغط ، لذلك يتم الان استخدام السرفر التاني لتوليد صورتك مجددا لذلك انتظر قليلا ❤️"});
-  const images = await generateImagesLinks(userText);
-
-          for (let image of images) {
-          botly.sendImage({id: senderId, url: image, aspectRatio: Botly.CONST.IMAGE_ASPECT_RATIO.HORIZONTAL});
-        }
-        userStatus[senderId] = false;
-        } catch {
-        console.error('Unexpected response:', data);
-        botly.sendText({id: senderId, text: "حدث خطأ أثناء محاولة تحويل النص إلى صور. يرجى المحاولة مرة أخرى في وقت لاحق."});
-        userStatus[senderId] = false;
-        }
-      }
-
-    }
-
+    botly.sendText({id: senderId, text: "يرجى ارسال الصور فقط ❤️"});
     } else if (message.message.attachments[0].payload.sticker_id) {
       botly.sendText({id: senderId, text: "(Y)"}) ;
     } else if (message.message.attachments[0].type == "image") {
-  botly.sendText({id: senderId, text: "يرجى ارسال النصوص فقط ❤️"});
+    if (userStatus[senderId]) {
+      botly.sendText({id: senderId, text: "رجاءا انتظر حتى يتم توليد الصورة الخاصة برسالتك السابقة ❤️"});
+    } else {
+      userStatus[senderId] = true;
+
+    botly.sendText({id: senderId, text: "جاري تحويل صورتك الى شكل انمي ❤️⏳"});
+
+const attachment = message.message.attachments[0] 
+        const url = attachment.payload.url;
+    fetch(url).then(res => res.buffer()).then(buffer => {
+        jadianime(buffer.toString('base64')).then(tuanime => {
+            botly.sendImage({
+                id: senderId,
+                url: 'https://www.drawever.com' + tuanime.urls[1],
+                is_reusable: true
+            }, (err, data) => {
+                console.log("image sent");
+            });
+        });
+    });
+      userStatus[senderId] = false;
+    
+    }
     } else if (message.message.attachments[0].type == "audio") {
       botly.sendText({id: senderId, text: "يرجى ارسال النصوص فقط ❤️"});
         } else if (message.message.attachments[0].type == "video") {
@@ -165,3 +151,51 @@ app.listen(process.env.PORT || port, () =>
   console.log(`App is on Port : ${port}`)
 )
 
+
+async function jadianime(image) {
+    return new Promise(async(resolve, reject) => {
+        const requestId = Math.random().toString(36).substring(7); 
+        const userAgent = getRandomUserAgent();
+        const ipAddress = generateRandomIP();
+        axios("https://www.drawever.com/api/photo-to-anime", {
+            headers: {
+                "content-type": "application/json",
+                "X-Request-ID": requestId,
+                "user-agent": userAgent,
+                "X-Forwarded-For": ipAddress,
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+                "Accept-Encoding": "gzip, deflate, br, zstd",
+                "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+                "Cookie": "DRAWEVER_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MDk4OWJlZDM5NzI3ODhiN2U1MjY0NCIsImVtYWlsIjoidGhlc2hhZG93YnJva2VyczEzM0BnbWFpbC5jb20iLCJmdWxsbmFtZSI6IlNoYWRvdyIsImNyZWRpdHMiOjAsImlhdCI6MTcxMTkwMTExOH0.TQmn5BBN4hrraSaggn9skoTJC7h7LDin9kq0zweSvdc",
+                "Referer": "https://www.drawever.com/process",
+                "Sec-Ch-Ua": "\"Google Chrome\";v=\"123\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"123\"",
+                "Sec-Ch-Ua-Mobile": "?0",
+                "Sec-Ch-Ua-Platform": "\"Windows\"",
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "same-origin",
+                "Upgrade-Insecure-Requests": "1",
+            },
+            "data": { "data": "data:image/jpeg;base64," + image },
+            "method": "POST"
+        }).then(res => { 
+            let yanz = res.data
+            resolve(yanz)
+        }).catch(err => {
+            reject(err)
+        });
+    });
+}
+
+function getRandomUserAgent() {
+    const userAgents = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.192 Safari/537.36",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.192 Safari/537.36"
+    ];
+    return userAgents[Math.floor(Math.random() * userAgents.length)];
+}
+
+function generateRandomIP() {
+    const octet = () => Math.floor(Math.random() * 256);
+    return `${octet()}.${octet()}.${octet()}.${octet()}`;
+}
